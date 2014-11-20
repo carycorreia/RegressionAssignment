@@ -1,0 +1,66 @@
+---
+title: "Motor Trend Analysis"
+author: "Cary Correia"
+date: "November 7, 2014"
+output: pdf_document
+---
+
+Context
+
+You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+“Is an automatic or manual transmission better for MPG”
+"Quantify the MPG difference between automatic and manual transmissions"
+
+Executive Summary
+
+
+```{r}
+summary(cars)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Appendix:
+
+Check off list for grading:
+- did the student interpret the coefficients correctly?
+
+- did the student fit multiple models and detail their strategy for model selection ?
+- Did the student answer the questions of interest or detail why the question(s) is (are) not answerable?
+- Did the student do a residual plot and some diagnostics?
+- Did the student quantify the uncertainty in their conclusions and/or perform an inference correctly?
+-Was the report brief (about 2 pages long) for the main body of the report and no longer than 5 with supporting appendix of figures?
+-Did the report include an executive summary?]
+-Was the report done in Rmd (knitr)?
+
+Motor Trend Car Road Tests
+
+Description
+
+The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+Usage
+
+mtcars
+Format
+
+A data frame with 32 observations on 11 variables.
+
+[, 1]   mpg	Miles/(US) gallon
+[, 2]	cyl	Number of cylinders
+[, 3]	disp	Displacement (cu.in.)
+[, 4]	hp	Gross horsepower
+[, 5]	drat	Rear axle ratio
+[, 6]	wt	Weight (lb/1000)
+[, 7]	qsec	1/4 mile time
+[, 8]	vs	V/S
+[, 9]	am	Transmission (0 = automatic, 1 = manual)
+[,10]	gear	Number of forward gears
+[,11]	carb	Number of carburetors

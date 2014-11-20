@@ -1,0 +1,142 @@
+---
+title: "Motor Trend Analysis"
+author: "Cary Correia"
+date: "November 7, 2014"
+output: pdf_document
+---
+Executive Summary: The mtcars database was extracted from the 1974 Motor Trend US magazine and comprises fuel consumption(mpg) and 10 possible regressors. This paper explores the relationship between these regressors and MPG.  There was a focused attempt to see if an automatic or manual transmission was better for MPG and to quantify the MPG difference between automatic and manual transmissions.
+``` {r, echo=FALSE, results = 'hide'}
+# mtcars Regression Analysis
+#
+# Load and explore database mtcars
+data(mtcars)
+attach(mtcars)
+mtcars
+
+# Explore cross correlation of all variables
+cor(mtcars)
+#
+# Draw pairwise graphs
+#pairs(mtcars)
+
+# Convert all discrete numerics into factors
+mtcars$am<-factor(mtcars$am)
+mtcars$gear<-factor(mtcars$gear)
+mtcars$carb<-factor(mtcars$carb)
+mtcars$vs<-factor(mtcars$vs)
+mtcars$cyl<-factor(mtcars$cyl)
+
+# Convert all discrete numerics into factors
+deltaAm<-(median(mpg[mtcars$am==1]))-(median(mpg[mtcars$am==0]))
+t.testam<-t.test(with(mtcars, mpg~am))
+
+# Set Intercept so that it's meaninful
+mtcars$wtFix<-with(mtcars, wt-min(wt))
+mtcars$hpFix<-with(mtcars, hp-min(hp))
+
+best.fit.wI<-lm(mpg ~ wtFix:am + cyl:hpFix +  am + wtFix + cyl + hpFix, mtcars)
+mtcars$pred.best.fit.wI<-predict(best.fit.wI)
+```
+A Boxplot and t-test showed that manual transmission's gave a median `r deltaAm` mpg boost over automatic with a significant p-value of `r t.testam[3]`. However we could see that other factors also influenced MPG via covariance plot/tests so regression models were built to test those relationships.
+
+Three regression models were created to explore mpg efficiency.
+The final regression equation consisted of the following terms auto/manual transmission, weight, cylinders, horsepower and hp interacting with cylinder and weight interacting with auto/manual transmissions.  This analysis reveals the following with respect to fuel consumption:
+
+1.  A manual transmission significantly drives performance by `r best.fit.wI$coefficients[2]` mpg
+2.  As weight increases by every 1 ton the mpg degrades by `r best.fit.wI$coefficients[3]` mpg
+3.  As weight increases with a manual transmission there is a further degradation by `r best.fit.wI$coefficients[7]` mpg
+4.  There were other factors that influenced mpg (cylinder and horsepower) but their effects were minimal (see detailed analysis)
+5.  Overall the final model had a Rsq of  `r summary(best.fit.wI)$r.squared` and Rsq Adj of  `r summary(best.fit.wI)$adj.r.squared` with a significant p-value for the overall model
+
+Final Verdict:
+Although this analysis proved that manual transmissions can lead to better mileage it should be noted that some biasing could be present in the data.  For example the data list and outliers showed that 32 makes were explored with only 1 measure/ vehicle and we don't know if there was 1 or many drivers involved or if other factors might have been present that could have introduced biasing.
+
+Detailed Analysis- Data Exploration:
+``` {r, echo=TRUE}
+# Load and explore database mtcars
+data(mtcars)
+cor(mtcars$mpg, mtcars)
+```
+
+Data shows we have mpg along with the other 10 factors.  Four factors (cyl, hp, wt and carb) showed negative correlations to mpg while the others were +ve.
+
+```{r, echo=FALSE}
+# Convert all discrete numerics into factors
+mtcars$am<-factor(mtcars$am)
+mtcars$gear<-factor(mtcars$gear)
+mtcars$carb<-factor(mtcars$carb)
+mtcars$vs<-factor(mtcars$vs)
+mtcars$cyl<-factor(mtcars$cyl)
+```
+###Boxplot and Regression Results
+The Boxplot shows a shift of `r deltaAm<-(median(mpg[mtcars$am==1]))-(median(mpg[mtcars$am==0])); deltaAm` mpg.  Manual transmissions have a significant effect on mpg. See boxplot figure in Appendix
+
+Regression Summary
+The following table shows the output of the 3 regression models deployed (see Appendix for code and sample output: (note:  the last two models we adjusted hp and wt to make the intercept easier to interpret)
+```{r, echo=TRUE, include="FALSE"}
+mtcars$wtFix<-with(mtcars, wt-min(wt))
+mtcars$hpFix<-with(mtcars, hp-min(hp))
+step.fit<-step(lm(mpg ~ ., mtcars), trace=0, steps=20000)
+step.fit.wI<-lm(mpg ~ wtFix:am + cyl:hpFix+ +am:hpFix + cyl:wtFix + am + wtFix + cyl +hpFix, mtcars)
+best.fit.wI<-lm(mpg ~ wtFix:am + cyl:hpFix +  am + wtFix + cyl + hpFix, mtcars)
+```
+
+```{r,echo=FALSE, results='hide', include="FALSE"}
+require(memisc)
+mtable123 <- mtable('Model 1' = step.fit,
+            'Model 2' = step.fit.wI,
+            'Model 3' = best.fit.wI,
+            summary.stats = c("R-squared", "adj. R-squared", "p"))
+require(pander)
+```
+`r pander(mtable123)`
+The table above shows the output of the 3 regression models used. Model 1 utilized a step-wise regression, Model 2 utilized a step-wise with interactions and Model 3 was manually trimmed to maximize Rsq and Rsq adjust (by dropping non-significant terms)
+  
+```{r, echo=TRUE}
+anova(step.fit, step.fit.wI, best.fit.wI, step.fit)[6]
+```
+From the anova table we can see that model 2 is better than model 1 (line 2) but not better than model 3 (line 3). Also line 4 shows that Model 3 is better than model 1.
+  
+Conclusions:  Manual transmissions do have a significant effect on mpg performance. (see detailed LM output in appendix) along with some of their key interaction variables.  See detail in the executive summary.
+
+
+###Appendix:
+
+Boxplot for MPG vs Transmission
+0= Automatic 1= Manual Transmission
+
+```{r, echo=FALSE, fig.width=6, fig.height=3.2}
+p.mpg.am<-t.test(mpg~am, mtcars)
+plot(mpg~am, main="MPG vs Transmission Boxplot", mtcars)
+# add legend with P-value result
+```
+
+Full result of final regression (best.fit.wI)- note other regressions suppressed to conserve space
+```{r echo=TRUE}
+summary(best.fit.wI)
+```
+
+Diagnositc plots for best.fit.wI- 
+```{r, echo=TRUE}
+par(mfrow=c(2,2));
+plot(best.fit.wI)
+```
+
+Analysis:
+
+- Residuals vs Fit graph shows no defined pattern.
+- The normality plot are normally distributed
+- Overall there are a few outliers but these cannot be evaluated further within the scope of this project.
+
+
+```{r echo=TRUE}
+mtcars$pred.best.fit.wI<-predict(best.fit.wI)
+par(mfrow=c(1,1))
+plot(pred.best.fit.wI~ mpg, main="Final Plot Showing Predicted Vs Actual Values",  mtcars)
+```
+Analysis:
+
+- This final plot of the Predicted values for mpg from the best.fit.wI model clearly aligns nicely to the actual MPG values that were given in the database
+- This strong correlation does support the strength of the model
+- Note there are a few outliers on the far right of the plot. Under normal circumstances it would be prudent to dig into these three points to look for other factors
+- Suggestion for next study to include notes so these outliers could be diagnosed better
