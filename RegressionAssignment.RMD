@@ -4,7 +4,7 @@ author: "Cary Correia"
 date: "November 7, 2014"
 output: pdf_document
 ---
-Executive Summary: The mtcars database was extracted from the 1974 Motor Trend US magazine and comprises fuel consumption(mpg) and 10 possible regressors. This paper explores the relationship between these regressors and MPG.  There was a focused attempt to see if an automatic or manual transmission was better for MPG and to quantify the MPG difference between automatic and manual transmissions.
+Executive Summary: The mtcars database was extracted from the 1974 Motor Trend US magazine & comprises fuel consumption(mpg) & 10 possible regressors. This paper explores the relationship between these regressors & MPG.  There was a focused attempt to see if an automatic or manual transmission was better for MPG & to quantify the MPG difference between automatic & manual transmissions.
 ``` {r, echo=FALSE, results = 'hide'}
 # mtcars Regression Analysis
 #
@@ -37,7 +37,7 @@ mtcars$hpFix<-with(mtcars, hp-min(hp))
 best.fit.wI<-lm(mpg ~ wtFix:am + cyl:hpFix +  am + wtFix + cyl + hpFix, mtcars)
 mtcars$pred.best.fit.wI<-predict(best.fit.wI)
 ```
-A Boxplot and t-test showed that manual transmission's gave a median `r deltaAm` mpg boost over automatic with a significant p-value of `r t.testam[3]`. However we could see that other factors also influenced MPG via covariance plot/tests so regression models were built to test those relationships.
+A Boxplot and t-test showed that manual transmission's gave a median `r deltaAm` mpg boost over automatic with a significant p-value of `r t.testam[3]`. However we could see that other factors influenced MPG via covariance plot/tests so regression models were built to test those relationships.
 
 Three regression models were created to explore mpg efficiency.
 The final regression equation consisted of the following terms auto/manual transmission, weight, cylinders, horsepower and hp interacting with cylinder and weight interacting with auto/manual transmissions.  This analysis reveals the following with respect to fuel consumption:
@@ -49,7 +49,7 @@ The final regression equation consisted of the following terms auto/manual trans
 5.  Overall the final model had a Rsq of  `r summary(best.fit.wI)$r.squared` and Rsq Adj of  `r summary(best.fit.wI)$adj.r.squared` with a significant p-value for the overall model
 
 Final Verdict:
-Although this analysis proved that manual transmissions can lead to better mileage it should be noted that some biasing could be present in the data.  For example the data list and outliers showed that 32 makes were explored with only 1 measure/ vehicle and we don't know if there was 1 or many drivers involved or if other factors might have been present that could have introduced biasing.
+Although this analysis proved that manual transmissions can lead to better mileage it should be noted that some biasing could be present. For example the data and outliers showed that 32 makes were explored with only 1 measure/vehicle and we don't know if there was 1 or many drivers involved or if other factors might have been present that could have introduced biasing. (see appendix for other biasing factors)
 
 Detailed Analysis- Data Exploration:
 ``` {r, echo=TRUE}
@@ -133,10 +133,14 @@ Analysis:
 mtcars$pred.best.fit.wI<-predict(best.fit.wI)
 par(mfrow=c(1,1))
 plot(pred.best.fit.wI~ mpg, main="Final Plot Showing Predicted Vs Actual Values",  mtcars)
+points(pred.best.fit.wI ~ mpg, pch=19, data=mtcars, col=((mtcars$am=="0")*1+1))
+temp<-legend("topleft", legend=c("Automatic","Manual "), 
+                text.width=strwidth("Automatic"),
+                lty =c(1,1), col=c("red", "black"), xjust=1, yjust=1,
+                title=("Transmission Types"))
 ```
 Analysis:
 
 - This final plot of the Predicted values for mpg from the best.fit.wI model clearly aligns nicely to the actual MPG values that were given in the database
 - This strong correlation does support the strength of the model
-- Note there are a few outliers on the far right of the plot. Under normal circumstances it would be prudent to dig into these three points to look for other factors
-- Suggestion for next study to include notes so these outliers could be diagnosed better
+- However from the graph we can also see that there is a higher proportion of automatic cars that are heavier.  The weight variable could be skewing the results of the regression and make it appear that manual cars get better mileage when in fact the manual transmission cars get better mileage just because they are lighter.  To confirm the results of this analysis it is suggested a follow up study beconducted where we mix the transmissions evenly with weight in order to prevent biasing of the results.
